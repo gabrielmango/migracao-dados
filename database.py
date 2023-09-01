@@ -1,5 +1,12 @@
+import os
+from dotenv import load_dotenv
+import time 
+
 from sqlalchemy import Column, Integer, String, Boolean, Date, Numeric, Text, TIMESTAMP
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
 
 
 Base = declarative_base()
@@ -173,3 +180,18 @@ class Telefone(Base):
     co_uuid = Column(String(255), nullable=False)
     co_uuid_1 = Column(String(255))
     
+    
+load_dotenv()
+URL_DATABASE_MIGRATION = os.getenv('URL_DATABASE_MIGRATION')
+engine = create_engine(URL_DATABASE_MIGRATION)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+class DataBase():
+   
+    def reset_db(self):
+        Base.metadata.drop_all(engine)
+        time.sleep(1)
+        Base.metadata.create_all(engine)
+    
+
