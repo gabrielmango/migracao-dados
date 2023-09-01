@@ -188,7 +188,67 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 class DataBase():
-   
+
+    def insert(self, tabela, dados):
+        try:
+            instancia_tabela = tabela(**dados)
+            session.add(instancia_tabela)
+            session.commit()
+            session.close()
+        except IntegrityError as e:
+            session.rollback()
+            print(f"Erro ao inserir os dados: {str(e)}")
+        except Exception as e:
+            session.rollback()
+            print(f"Erro desconhecido: {str(e)}")
+        finally:
+            session.close()
+    
+        
+    def documento_existente(self, numero_cpf: str, tipo: str) -> bool:
+        documento = session.query(Documento).filter_by(nu_documento = numero_cpf, tp_documento = tipo).first()
+        
+        try:
+            return documento.nu_documento == numero_cpf
+        except AttributeError:
+            return False
+        
+    def consulta_couuid_documento(self, numero_cpf: str, tipo: str) -> str:
+        documento = session.query(Documento).filter_by(nu_documento = numero_cpf, tp_documento = tipo).first()
+        
+        try:
+            return documento.co_uuid_2
+        except AttributeError:
+            return ' '
+        
+
+    def consultar_id_geralpessoa(self, uuid_pessoa):
+        id = session.query(GeralPessoa).filter_by(co_uuid_2 = uuid_pessoa).first()  
+        
+        try:
+            return id.co_seq_geral_pessoa
+        except AttributeError:
+            return False
+        
+        
+    def consultar_nome(self, nome):
+        _nome = session.query(Pessoa).filter_by(no_pessoa = nome).first()
+        
+        try:
+            return _nome.co_uuid
+        except AttributeError:
+            return False
+        
+    def consultar_nascimento(self, data_nascimento):
+        _nascimento = session.query(GeralPessoa).filter_by(dt_nascimento_pessoa = data_nascimento).first()
+        
+        try:
+            return _nascimento.dt_nascimento_pessoa
+        except AttributeError:
+            return False
+            
+        
+        
     def reset_db(self):
         Base.metadata.drop_all(engine)
         time.sleep(1)
